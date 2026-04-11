@@ -17,7 +17,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,11 +36,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // CAMBIO SENIOR: Usamos compilerOptions para evitar el error de la línea 38
+    // Configuración de compilador para Kotlin 2.0+
     kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+        jvmToolchain(17)
     }
 
     buildFeatures {
@@ -50,7 +47,7 @@ android {
 }
 
 dependencies {
-    // UI y Navegación (El terreno de tu amiga)
+    // UI y Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -61,27 +58,28 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
 
-    // Inyección de Dependencias (Hilt)
+    // --- ESTO ES LO QUE TE FALTA PARA QUITAR EL ROJO ---
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("io.coil-kt:coil-compose:2.5.0") // Esto arregla PastelCard
+    implementation("androidx.biometric:biometric:1.1.0")
+
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // Datos Local (Room)
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Datos Remoto (Ktor) - AQUÍ ESTABA EL ERROR DE LOS GUIONES
-    // Se cambian los guiones (-) por puntos (.) para que Gradle los reconozca
+    // Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.logging)
 
-    // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.ui.tooling)
 }

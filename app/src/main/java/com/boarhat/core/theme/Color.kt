@@ -1,11 +1,11 @@
-package com.boarhat.core.theme
+package com.boarhat.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Colores extraídos de tu diseño "The Boar Hat"
+val Boar_FondoCrema = Color(0xFFFDF8F5)
+val Boar_VerdeOliva = Color(0xFF8B945E)
+val Boar_MarronArcilla = Color(0xFFC69C6D)
+val Boar_NaranjaSuave = Color(0xFFFFE0B2)
+val Boar_BlancoCard = Color(0xFFFFFFFF)
+val Boar_NegroTexto = Color(0xFF000000)
