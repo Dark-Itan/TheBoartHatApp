@@ -16,6 +16,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.boarhat.ui.theme.*
 
+/**
+ * Banking configuration placeholder.
+ * TODO: In production, fetch these values from a secure backend API
+ * or remote config service instead of shipping them in the APK binary.
+ */
+private object BankingConfig {
+    const val BANK_NAME = "Configurar en servidor"
+    const val CLABE = "Configurar en servidor"
+    const val BENEFICIARY = "Configurar en servidor"
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PagoTransferenciaScreen(
@@ -62,11 +73,11 @@ fun PagoTransferenciaScreen(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    DatoBancario(titulo = "Banco", valor = "BoarBank")
+                    DatoBancario(titulo = "Banco", valor = BankingConfig.BANK_NAME)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Boar_FondoCrema)
-                    DatoBancario(titulo = "CLABE", valor = "0123 4567 8901 2345 67", tieneCopy = true)
+                    DatoBancario(titulo = "CLABE", valor = BankingConfig.CLABE, tieneCopy = true)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Boar_FondoCrema)
-                    DatoBancario(titulo = "Beneficiario", valor = "The Boar Hat S.A.")
+                    DatoBancario(titulo = "Beneficiario", valor = BankingConfig.BENEFICIARY)
                 }
             }
 

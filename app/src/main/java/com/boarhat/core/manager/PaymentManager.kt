@@ -10,7 +10,10 @@ class PaymentManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     suspend fun autenticarBiometrico(): Boolean {
-        // Simulamos que la huella fue exitosa para que la app compile y corra
+        // SECURITY WARNING: This is a stub that always returns true.
+        // In production, replace with a real BiometricPrompt implementation
+        // to enforce biometric authentication before processing payments.
+        // See: https://developer.android.com/training/sign-in/biometric-auth
         return true
     }
 }
