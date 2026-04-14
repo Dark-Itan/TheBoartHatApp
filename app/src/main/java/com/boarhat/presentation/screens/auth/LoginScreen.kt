@@ -12,10 +12,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.boarhat.ui.theme.* // Importamos tus nuevos colores
-import com.boarhat.R // Importamos R para el logo
+import com.boarhat.ui.theme.*
+import com.boarhat.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +65,7 @@ fun LoginScreen(
         // --- CAMPOS DE TEXTO ---
         OutlinedTextField(
             value = usuario,
-            onValueChange = { usuario = it },
+            onValueChange = { if (it.length <= 50) usuario = it },
             label = { Text("Usuario") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -80,11 +81,12 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { if (it.length <= 100) password = it },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             isError = error,
+            visualTransformation = PasswordVisualTransformation(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Boar_MarronArcilla,
                 unfocusedContainerColor = Color.White,
@@ -106,11 +108,15 @@ fun LoginScreen(
         // --- BOTÓN INGRESAR (Color Marrón Arcilla de tu diseño) ---
         Button(
             onClick = {
-                when (usuario.lowercase()) {
-                    "cliente" -> onLoginSuccess("cliente")
-                    "vendedor" -> onLoginSuccess("vendedor")
-                    "admin" -> onLoginSuccess("admin")
-                    else -> error = true
+                if (password.isBlank()) {
+                    error = true
+                } else {
+                    when (usuario.lowercase()) {
+                        "cliente" -> onLoginSuccess("cliente")
+                        "vendedor" -> onLoginSuccess("vendedor")
+                        "admin" -> onLoginSuccess("admin")
+                        else -> error = true
+                    }
                 }
             },
             modifier = Modifier

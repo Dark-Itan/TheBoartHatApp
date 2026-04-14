@@ -2,6 +2,8 @@ package com.boarhat.presentation.navigation
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
@@ -13,23 +15,31 @@ import com.boarhat.presentation.screens.vendedor.*
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
+    val currentRole = remember { mutableStateOf("") }
 
     NavHost(navController = navController, startDestination = "login") {
 
         // --- LOGIN ---
         composable("login") {
             LoginScreen { rol ->
+                currentRole.value = rol
                 val destino = when (rol) {
                     "admin" -> "admin_dashboard"
                     "vendedor" -> "vendedor_menu"
                     else -> "cliente_menu"
                 }
-                navController.navigate(destino)
+                navController.navigate(destino) {
+                    popUpTo("login") { inclusive = true }
+                }
             }
         }
 
-        // --- ADMINISTRADOR ---
+        // --- ADMINISTRADOR (role-guarded) ---
         composable("admin_dashboard") {
+            if (currentRole.value != "admin") {
+                navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                return@composable
+            }
             AdminDashboardScreen(
                 onNavigateToGestionPasteles = { navController.navigate("agregar_pastel") },
                 onNavigateToInventario = { /* Implementar Pantalla */ },
@@ -47,8 +57,12 @@ fun NavGraph() {
             )
         }
 
-        // --- VENDEDOR ---
+        // --- VENDEDOR (role-guarded) ---
         composable("vendedor_menu") {
+            if (currentRole.value != "vendedor") {
+                navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                return@composable
+            }
             MenuVendedorScreen(
                 onNavigateToTomarPedido = { navController.navigate("punto_venta") },
                 onNavigateToListaPedidos = { /* Implementar */ },
