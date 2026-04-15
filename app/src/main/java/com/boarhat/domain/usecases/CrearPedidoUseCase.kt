@@ -3,8 +3,9 @@ package com.boarhat.domain.usecases.pedido
 import com.boarhat.domain.entities.Pedido
 import com.boarhat.domain.repositories.PedidoRepository
 import com.boarhat.domain.usecases.pastel.UpdatePastelUseCase
+import javax.inject.Inject
 
-class CrearPedidoUseCase(
+class CrearPedidoUseCase @Inject constructor(
     private val pedidoRepository: PedidoRepository,
     private val updateStockUseCase: UpdatePastelUseCase
 ) {

@@ -33,70 +33,81 @@ class AdminViewModel @Inject constructor(
     private val vibrationManager: VibrationManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AdminUIState(
-        isLoading = false,
-        pasteles = MockData.listaPasteles
-    ))
+    private val _uiState = MutableStateFlow(AdminUIState())
     val uiState: StateFlow<AdminUIState> = _uiState.asStateFlow()
 
-    init {
+    init { refreshAll() }
+
+    fun refreshAll() {
         cargarPasteles()
         cargarPedidos()
     }
 
-    fun cargarPasteles() {
+    private fun cargarPasteles() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            getPastelesUseCase().collect { pasteles ->
-                _uiState.update { it.copy(isLoading = false, pasteles = pasteles) }
+            getPastelesUseCase().collect { lista ->
+                _uiState.update { it.copy(isLoading = false, pasteles = lista) }
             }
         }
     }
 
-    fun cargarPedidos() {
+    private fun cargarPedidos() {
         viewModelScope.launch {
-            getPedidosUseCase().collect { pedidos ->
-                _uiState.update { it.copy(pedidos = pedidos) }
+            getPedidosUseCase().collect { lista ->
+                _uiState.update { it.copy(pedidos = lista) }
             }
         }
     }
 
     fun agregarPastel(pastel: Pastel, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val success = addPastelUseCase(pastel)
-            if (success) {
-                vibrationManager.vibrarExito()
-                cargarPasteles()
-            } else {
-                vibrationManager.vibrarError()
+            try {
+                val success = addPastelUseCase(pastel)
+                if (success) {
+                    if (!MockData.listaPasteles.any { it.id == pastel.id }) {
+                        MockData.listaPasteles.add(pastel)
+                    }
+                    vibrationManager.vibrarExito()
+                    refreshAll()
+                }
+                onResult(success)
+            } catch (ignore: Exception) {
+                onResult(false)
             }
-            onResult(success)
         }
     }
 
     fun actualizarPastel(pastel: Pastel, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val success = updatePastelUseCase(pastel)
-            if (success) {
-                vibrationManager.vibrarExito()
-                cargarPasteles()
-            } else {
-                vibrationManager.vibrarError()
+            try {
+                val success = updatePastelUseCase(pastel)
+                if (success) {
+                    val index = MockData.listaPasteles.indexOfFirst { it.id == pastel.id }
+                    if (index != -1) { MockData.listaPasteles[index] = pastel }
+                    vibrationManager.vibrarExito()
+                    refreshAll()
+                    onResult(true)
+                } else { onResult(false) }
+            } catch (ignore: Exception) {
+                onResult(false)
             }
-            onResult(success)
         }
     }
 
     fun eliminarPastel(id: Int, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val success = deletePastelUseCase(id)
-            if (success) {
-                vibrationManager.vibrarExito()
-                cargarPasteles()
-            } else {
-                vibrationManager.vibrarError()
+            try {
+                val success = deletePastelUseCase(id)
+                if (success) {
+                    MockData.listaPasteles.removeAll { it.id == id }
+                    vibrationManager.vibrarExito()
+                    refreshAll()
+                    onResult(true)
+                } else { onResult(false) }
+            } catch (ignore: Exception) {
+                onResult(false)
             }
-            onResult(success)
         }
     }
 }

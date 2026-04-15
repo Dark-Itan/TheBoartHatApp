@@ -1,38 +1,48 @@
 package com.boarhat.data
 
-import com.boarhat.domain.entities.Pastel
+import com.boarhat.domain.entities.*
+import java.util.Date
 
 object MockData {
-    val listaPasteles = listOf(
+    // UNICA declaración de listaPasteles
+    val listaPasteles = mutableListOf(
         Pastel(
             id = 1,
-            nombre = "Pastel Tres Leches",
-            precio = 450.0,
-            stock = 15,
-            descripcion = "El favorito de la casa",
-            imagenUrl = "",
-            categoria = "Clásicos",      // <--- Agregado para quitar el error
-            ingredientes = listOf("Leche", "Harina") // <--- Agregado para quitar el error
+            nombre = "Pastel de Chocolate",
+            precio = 350.0,
+            stock = 10,
+            descripcion = "Chocolate amargo 70% cacao",
+            imagenUrl = "https://images.unsplash.com/photo-1578985545062-69928b1d9587",
+            categoria = "Chocolates",
+            ingredientes = listOf("Cacao", "Leche", "Harina")
         ),
         Pastel(
             id = 2,
-            nombre = "Chocolate Real",
-            precio = 380.0,
-            stock = 3,
-            descripcion = "Cacao 70%",
-            imagenUrl = "",
+            nombre = "Red Velvet",
+            precio = 400.0,
+            stock = 5,
+            descripcion = "Clásico con betún de queso crema",
+            imagenUrl = "https://images.unsplash.com/photo-1586788680434-30d3246718d0",
             categoria = "Especiales",
-            ingredientes = listOf("Cacao", "Azúcar")
-        ),
-        Pastel(
-            id = 3,
-            nombre = "Pay de Limón",
-            precio = 250.0,
-            stock = 0,
-            descripcion = "Cremoso y ácido",
-            imagenUrl = "",
-            categoria = "Pays",
-            ingredientes = listOf("Limón", "Galleta")
+            ingredientes = listOf("Vainilla", "Queso Crema", "Colorante natural")
         )
     )
+
+    val listaPedidos = mutableListOf<Pedido>()
+
+    fun agregarPedidoDePrueba() {
+        listaPedidos.add(
+            Pedido(
+                id = 101,
+                clienteNombre = "Usuario Prueba",
+                clienteTelefono = "123456789",
+                items = emptyList(),
+                total = 350.0,
+                fecha = Date(),
+                estado = EstadoPedido.PENDIENTE,
+                metodoPago = MetodoPago.TRANSFERENCIA,
+                comprobanteUrl = null
+            )
+        )
+    }
 }

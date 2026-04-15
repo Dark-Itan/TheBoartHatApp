@@ -2,8 +2,9 @@ package com.boarhat.domain.usecases.pastel
 
 import com.boarhat.domain.entities.Pastel
 import com.boarhat.domain.repositories.PastelRepository
+import javax.inject.Inject
 
-class AddPastelUseCase(
+class AddPastelUseCase @Inject constructor(
     private val repository: PastelRepository
 ) {
     suspend operator fun invoke(pastel: Pastel): Boolean {

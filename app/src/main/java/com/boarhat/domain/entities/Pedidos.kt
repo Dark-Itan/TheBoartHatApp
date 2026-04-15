@@ -9,10 +9,12 @@ data class Pedido(
     val items: List<ItemPedido>,
     val total: Double,
     val fecha: Date,
-    val estado: EstadoPedido,  // PENDIENTE, PAGADO, PREPARANDO, ENTREGADO
-    val metodoPago: MetodoPago,  // EFECTIVO, TARJETA, TRANSFERENCIA, PIX
+    val estado: EstadoPedido,
+    val metodoPago: MetodoPago,
     val montoRecibido: Double = 0.0,
-    val cambio: Double = 0.0
+    val cambio: Double = 0.0,
+    // AGREGA ESTA LÍNEA PARA SOLUCIONAR EL ERROR:
+    val comprobanteUrl: String? = null
 )
 
 data class ItemPedido(
@@ -34,6 +36,5 @@ enum class EstadoPedido {
 enum class MetodoPago {
     EFECTIVO,
     TARJETA,
-    TRANSFERENCIA,
-    PIX
+    TRANSFERENCIA
 }

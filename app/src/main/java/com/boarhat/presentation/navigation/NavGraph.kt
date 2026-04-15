@@ -1,6 +1,5 @@
 package com.boarhat.presentation.navigation
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
@@ -8,7 +7,6 @@ import androidx.navigation.navArgument
 import com.boarhat.presentation.screens.admin.*
 import com.boarhat.presentation.screens.auth.LoginScreen
 import com.boarhat.presentation.screens.cliente.*
-import com.boarhat.presentation.screens.vendedor.*
 
 @Composable
 fun NavGraph() {
@@ -19,11 +17,7 @@ fun NavGraph() {
         // --- LOGIN ---
         composable("login") {
             LoginScreen { rol ->
-                val destino = when (rol) {
-                    "admin" -> "admin_dashboard"
-                    "vendedor" -> "vendedor_menu"
-                    else -> "cliente_menu"
-                }
+                val destino = if (rol == "admin") "admin_dashboard" else "cliente_menu"
                 navController.navigate(destino)
             }
         }
@@ -31,59 +25,50 @@ fun NavGraph() {
         // --- ADMINISTRADOR ---
         composable("admin_dashboard") {
             AdminDashboardScreen(
-                onNavigateToGestionPasteles = { navController.navigate("agregar_pastel") },
-                onNavigateToInventario = { /* Implementar Pantalla */ },
-                onNavigateToNotificaciones = { /* Implementar Pantalla */ },
-                onNavigateToReportes = { /* Implementar Pantalla */ },
+                onNavigateToGestionPasteles = { navController.navigate("gestion_pasteles") },
+                onNavigateToInventario = { navController.navigate("gestion_pasteles") },
                 onNavigateToAgregarPastel = { navController.navigate("agregar_pastel") },
-                onNavigateToPedidosAdmin = { /* Implementar Pantalla */ }
+                onNavigateToNotificaciones = { /* Implementar luego */ },
+                onNavigateToReportes = { navController.navigate("reportes_admin") },
+                onNavigateToPedidosAdmin = { navController.navigate("pedidos_admin") }
+            )
+        }
+
+        composable("gestion_pasteles") {
+            GestionPastelesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEditar = { id ->
+                    navController.navigate("editar_pastel/$id")
+                }
+            )
+        }
+
+        composable(
+            route = "editar_pastel/{pastelId}",
+            arguments = listOf(navArgument("pastelId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("pastelId") ?: 0
+            EditarPastelScreen(
+                pastelId = id,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable("agregar_pastel") {
             AgregarPastelScreen(
-                onPastelGuardado = { navController.popBackStack() },
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        // --- VENDEDOR ---
-        composable("vendedor_menu") {
-            MenuVendedorScreen(
-                onNavigateToTomarPedido = { navController.navigate("punto_venta") },
-                onNavigateToListaPedidos = { /* Implementar */ },
-                onNavigateToNotificaciones = { /* Implementar */ },
-                onNavigateToPerfil = { navController.navigate("perfil") }
-            )
-        }
-
-        composable("punto_venta") {
-            PuntoVentaScreen(
-                onFinalizarVenta = { total, pago, cambio ->
-                    navController.navigate("ticket_venta/$total/$pago/$cambio")
+                onPastelGuardado = {
+                    navController.popBackStack()
                 },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(
-            route = "ticket_venta/{total}/{pago}/{cambio}",
-            arguments = listOf(
-                navArgument("total") { type = NavType.FloatType },
-                navArgument("pago") { type = NavType.FloatType },
-                navArgument("cambio") { type = NavType.FloatType }
-            )
-        ) { backStackEntry ->
-            TicketVentaScreen(
-                total = backStackEntry.arguments?.getFloat("total") ?: 0f,
-                pago = backStackEntry.arguments?.getFloat("pago") ?: 0f,
-                cambio = backStackEntry.arguments?.getFloat("cambio") ?: 0f,
-                onFinalizar = {
-                    navController.navigate("vendedor_menu") {
-                        popUpTo("vendedor_menu") { inclusive = true }
-                    }
-                }
-            )
+        composable("pedidos_admin") {
+            PedidosAdminScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable("reportes_admin") {
+            ReportesScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         // --- CLIENTE ---
@@ -95,27 +80,32 @@ fun NavGraph() {
             )
         }
 
-        composable("carrito") {
-            CarritoScreen(
-                onNavigateToPago = { navController.navigate("pago_transferencia") },
-                onNavigateBack = { navController.popBackStack() }
+        // RUTA DETALLE (Esta es nueva y necesaria para el Cliente)
+        composable(
+            route = "detalle_pastel/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            DetallePastelScreen(
+                pastelId = id,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCarrito = { navController.navigate("carrito") }
             )
         }
 
-        composable("pago_transferencia") {
-            PagoTransferenciaScreen(
-                onConfirmarPedido = {
+        // CARRITO (Aquí corregimos el error de la imagen)
+        composable("carrito") {
+            CarritoScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToExito = {
+                    // Al confirmar, vamos a una pantalla de éxito o volvemos al menú
                     navController.navigate("cliente_menu") {
                         popUpTo("cliente_menu") { inclusive = true }
                     }
-                },
-                onNavigateBack = { navController.popBackStack() }
+                }
             )
         }
 
-        composable("perfil") {
-            // Aquí puedes crear una pantalla de perfil simple o reutilizar una
-            Text("Pantalla de Perfil en construcción")
-        }
+        composable("perfil") { PerfilScreen() }
     }
 }

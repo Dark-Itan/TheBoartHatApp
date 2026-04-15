@@ -4,8 +4,9 @@ import com.boarhat.domain.entities.EstadoPedido
 import com.boarhat.domain.entities.MetodoPago
 import com.boarhat.domain.repositories.PedidoRepository
 import com.boarhat.domain.repositories.PastelRepository // Necesario para el stock
+import javax.inject.Inject
 
-class ProcesarPagoUseCase(
+class ProcesarPagoUseCase @Inject constructor(
     private val pedidoRepository: PedidoRepository,
     private val pastelRepository: PastelRepository // Inyectamos el repositorio de pasteles
 ) {
