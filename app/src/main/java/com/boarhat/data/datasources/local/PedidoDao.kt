@@ -20,6 +20,14 @@ interface PedidoDao {
     @Query("UPDATE pedidos SET estado = :nuevoEstado WHERE id = :id")
     suspend fun actualizarEstado(id: Int, nuevoEstado: String)
 
-    @Query("UPDATE pedidos SET estado = :nuevoEstado, metodoPago = :metodoPago, montoRecibido = :montoRecibido, cambio = :cambio WHERE id = :id")
-    suspend fun actualizarPago(id: Int, nuevoEstado: String, metodoPago: String, montoRecibido: Double, cambio: Double)
+    // FUNCIÓN CORREGIDA: Eliminamos montoRecibido y cambio para evitar errores de compilación
+    @Query("UPDATE pedidos SET estado = :nuevoEstado, metodoPago = :metodoPago WHERE id = :id")
+    suspend fun actualizarPago(
+        id: Int,
+        nuevoEstado: String,
+        metodoPago: String
+    )
+
+    @Delete
+    suspend fun deletePedido(pedido: PedidoEntity)
 }

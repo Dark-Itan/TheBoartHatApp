@@ -12,11 +12,12 @@ fun PedidoEntity.toDomain(): Pedido = Pedido(
     clienteTelefono = clienteTelefono,
     items = Gson().fromJson(itemsJson, object : TypeToken<List<ItemPedido>>() {}.type),
     total = total,
+    anticipo50 = anticipo50, // Mapeo nuevo
     fecha = Date(fecha),
+    fechaRecoleccion = fechaRecoleccion, // Mapeo nuevo
     estado = EstadoPedido.valueOf(estado),
     metodoPago = MetodoPago.valueOf(metodoPago),
-    montoRecibido = montoRecibido,
-    cambio = cambio
+    comprobanteUrl = comprobanteUrl
 )
 
 fun Pedido.toEntity(): PedidoEntity = PedidoEntity(
@@ -25,9 +26,10 @@ fun Pedido.toEntity(): PedidoEntity = PedidoEntity(
     clienteTelefono = clienteTelefono,
     itemsJson = Gson().toJson(items),
     total = total,
+    anticipo50 = anticipo50, // Mapeo nuevo
     fecha = fecha.time,
+    fechaRecoleccion = fechaRecoleccion, // Mapeo nuevo
     estado = estado.name,
     metodoPago = metodoPago.name,
-    montoRecibido = montoRecibido,
-    cambio = cambio
+    comprobanteUrl = comprobanteUrl
 )

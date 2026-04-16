@@ -27,74 +27,49 @@ fun CarritoScreen(
     val uiState by viewModel.uiState.collectAsState()
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
+    var fechaRecoleccion by remember { mutableStateOf("") }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mi Carrito") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Scaffold(topBar = { TopAppBar(title = { Text("Mi Carrito") }) }) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            if (uiState.carrito.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Tu carrito está vacío", color = Color.Gray)
+            LazyColumn(modifier = Modifier.weight(1f).padding(16.dp)) {
+                items(uiState.carrito) { item ->
+                    ListItem(
+                        headlineContent = { Text(item.nombre) },
+                        supportingContent = { Text("${item.cantidad} unidades - ${item.detallesAdicionales}") },
+                        trailingContent = { Text("$${item.subtotal}") }
+                    )
+                    HorizontalDivider()
                 }
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f).padding(16.dp)) {
-                    items(uiState.carrito) { item ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text(item.nombre, fontWeight = FontWeight.Bold)
-                                Text("${item.cantidad} x $${item.precioUnitario}", fontSize = 14.sp)
-                            }
-                            Text("$${item.subtotal}", fontWeight = FontWeight.Bold)
-                        }
-                        HorizontalDivider()
-                    }
-                }
+            }
 
-                // Datos del Cliente
-                Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Datos de Entrega", fontWeight = FontWeight.Bold)
-                        OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Tu Nombre") }, modifier = Modifier.fillMaxWidth())
-                        OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth())
+            // SECCIÓN DE PAGO 50%
+            Card(modifier = Modifier.fillMaxWidth().padding(16.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                        Text("Total del pedido:")
+                        Text("$${uiState.totalCarrito}")
                     }
+                    Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                        Text("Anticipo requerido (50%):", fontWeight = FontWeight.Bold)
+                        Text("$${uiState.totalCarrito / 2}", fontWeight = FontWeight.Bold, color = Color.Red)
+                    }
+                    Text("Paga el 50% ahora para procesar tu pedido y el resto al recoger.", fontSize = 12.sp)
                 }
+            }
 
-                // Total y Confirmar
-                Surface(tonalElevation = 8.dp) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total:", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                            Text("$${uiState.totalCarrito}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFFAD8D6C))
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = {
-                                if (nombre.isNotBlank() && telefono.isNotBlank()) {
-                                    viewModel.crearPedido(nombre, telefono) { success, id ->
-                                        if (success) onNavigateToExito()
-                                    }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAD8D6C)),
-                            enabled = nombre.isNotBlank() && telefono.isNotBlank()
-                        ) {
-                            Text("CONFIRMAR PEDIDO")
-                        }
-                    }
-                }
+            // Datos de recolección
+            Column(modifier = Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = fechaRecoleccion, onValueChange = { fechaRecoleccion = it }, label = { Text("¿Cuándo pasas por él? (Fecha y Hora)") }, modifier = Modifier.fillMaxWidth())
+            }
+
+            Button(
+                onClick = { viewModel.crearPedido(nombre, telefono, fechaRecoleccion) { success -> if(success) onNavigateToExito() } },
+                modifier = Modifier.fillMaxWidth().padding(16.dp).height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAD8D6C)),
+                enabled = nombre.isNotBlank() && fechaRecoleccion.isNotBlank()
+            ) {
+                Text("PAGAR ANTICIPO Y FINALIZAR")
             }
         }
     }

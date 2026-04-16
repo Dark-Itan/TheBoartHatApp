@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [PastelEntity::class, PedidoEntity::class],
-    version = 1,
+    version = 2, // 1. SUBIMOS LA VERSIÓN: Room sabrá que el diseño cambió
     exportSchema = false
 )
 abstract class BoarHatDatabase : RoomDatabase() {
@@ -24,7 +24,11 @@ abstract class BoarHatDatabase : RoomDatabase() {
                     context.applicationContext,
                     BoarHatDatabase::class.java,
                     "boarhat_database"
-                ).build()
+                )
+                    // 2. AGREGAMOS ESTA LÍNEA: Si la versión no coincide,
+                    // borra la vieja y crea la nueva automáticamente.
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

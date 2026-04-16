@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -29,149 +30,58 @@ fun DetallePastelScreen(
     viewModel: ClienteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    // Buscamos el pastel en la lista del estado
     val pastel = uiState.pasteles.find { it.id == pastelId }
 
-    // Estado local para la cantidad que el cliente quiere pedir
     var cantidad by remember { mutableIntStateOf(1) }
+    var notas by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalle del Pastel") },
+                title = { Text("Detalles del Pedido") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToCarrito) {
-                        BadgedBox(badge = {
-                            if (uiState.carrito.isNotEmpty()) {
-                                Badge { Text(uiState.carrito.size.toString()) }
-                            }
-                        }) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
-                        }
-                    }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "") }
                 }
             )
         }
     ) { padding ->
-        if (pastel == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFFAD8D6C))
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                // Imagen del Pastel
-                AsyncImage(
-                    model = pastel.imagenUrl,
-                    contentDescription = pastel.nombre,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    contentScale = ContentScale.Crop
+        pastel?.let { p ->
+            Column(modifier = Modifier.padding(padding).padding(20.dp).verticalScroll(rememberScrollState())) {
+                AsyncImage(model = p.imagenUrl, contentDescription = null, modifier = Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(p.nombre, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text("Stock disponible: ${p.stock}", color = if(p.stock > 3) Color.Gray else Color.Red)
+
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = notas,
+                    onValueChange = { notas = it },
+                    label = { Text("Instrucciones especiales (detalles, nombres, etc.)") },
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = pastel.nombre,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "$${pastel.precio}",
-                            fontSize = 22.sp,
-                            color = Color(0xFFAD8D6C),
-                            fontWeight = FontWeight.ExtraBold
-                        )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { if (cantidad > 1) cantidad-- }) { Text("-", fontSize = 24.sp) }
+                        Text("$cantidad", modifier = Modifier.padding(horizontal = 16.dp), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        IconButton(onClick = { if (cantidad < p.stock) cantidad++ }) { Text("+", fontSize = 24.sp) }
                     }
+                    Text("Subtotal: $${p.precio * cantidad}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFFAD8D6C))
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // --- INDICADOR DE STOCK (Lo que el admin controla) ---
-                    val hayStock = pastel.stock > 0
-                    Surface(
-                        color = if (hayStock) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = if (hayStock) "Disponible: ${pastel.stock} unidades" else "AGOTADO",
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            color = if (hayStock) Color(0xFF2E7D32) else Color.Red,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = "Descripción", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(text = pastel.descripcion, color = Color.Gray, fontSize = 16.sp)
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    if (hayStock) {
-                        // Selector de cantidad
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedButton(
-                                onClick = { if (cantidad > 1) cantidad-- },
-                                shape = RoundedCornerShape(8.dp)
-                            ) { Text("-") }
-
-                            Text(
-                                text = cantidad.toString(),
-                                modifier = Modifier.padding(horizontal = 24.dp),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            OutlinedButton(
-                                onClick = { if (cantidad < pastel.stock) cantidad++ },
-                                shape = RoundedCornerShape(8.dp)
-                            ) { Text("+") }
-                        }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // Botón Agregar
-                        Button(
-                            onClick = {
-                                viewModel.agregarAlCarrito(pastel, cantidad)
-                                onNavigateToCarrito()
-                            },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAD8D6C))
-                        ) {
-                            Text("AGREGAR AL CARRITO", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        }
-                    } else {
-                        // Botón deshabilitado si no hay stock
-                        Button(
-                            onClick = { },
-                            enabled = false,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text("SIN EXISTENCIAS", fontWeight = FontWeight.Bold)
-                        }
-                    }
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = {
+                        viewModel.agregarAlCarrito(p, cantidad, notas)
+                        onNavigateToCarrito()
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAD8D6C)),
+                    enabled = p.stock > 0
+                ) {
+                    Text("AGREGAR AL CARRITO")
                 }
             }
         }

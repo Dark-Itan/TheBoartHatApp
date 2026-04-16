@@ -6,6 +6,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.boarhat.presentation.screens.admin.*
 import com.boarhat.presentation.screens.auth.LoginScreen
+import com.boarhat.presentation.screens.auth.RegistroScreen // <--- Importante añadir este
 import com.boarhat.presentation.screens.cliente.*
 
 @Composable
@@ -16,10 +17,29 @@ fun NavGraph() {
 
         // --- LOGIN ---
         composable("login") {
-            LoginScreen { rol ->
-                val destino = if (rol == "admin") "admin_dashboard" else "cliente_menu"
-                navController.navigate(destino)
-            }
+            LoginScreen(
+                onLoginSuccess = { rol ->
+                    val destino = if (rol == "admin") "admin_dashboard" else "cliente_menu"
+                    navController.navigate(destino)
+                },
+                onNavigateToRegistro = {
+                    navController.navigate("registro") // <--- Esto resuelve el error
+                }
+            )
+        }
+
+        // --- REGISTRO (NUEVA RUTA) ---
+        composable("registro") {
+            RegistroScreen(
+                onRegistroExitoso = {
+                    navController.navigate("login") {
+                        popUpTo("registro") { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         // --- ADMINISTRADOR ---
@@ -56,9 +76,7 @@ fun NavGraph() {
 
         composable("agregar_pastel") {
             AgregarPastelScreen(
-                onPastelGuardado = {
-                    navController.popBackStack()
-                },
+                onPastelGuardado = { navController.popBackStack() },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -80,7 +98,6 @@ fun NavGraph() {
             )
         }
 
-        // RUTA DETALLE (Esta es nueva y necesaria para el Cliente)
         composable(
             route = "detalle_pastel/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
@@ -93,12 +110,10 @@ fun NavGraph() {
             )
         }
 
-        // CARRITO (Aquí corregimos el error de la imagen)
         composable("carrito") {
             CarritoScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToExito = {
-                    // Al confirmar, vamos a una pantalla de éxito o volvemos al menú
                     navController.navigate("cliente_menu") {
                         popUpTo("cliente_menu") { inclusive = true }
                     }
@@ -106,6 +121,10 @@ fun NavGraph() {
             )
         }
 
-        composable("perfil") { PerfilScreen() }
+        composable("perfil") {
+            PerfilScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }

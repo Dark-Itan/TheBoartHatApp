@@ -36,6 +36,9 @@ class AdminViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AdminUIState())
     val uiState: StateFlow<AdminUIState> = _uiState.asStateFlow()
 
+    // Control de notificaciones
+    private var conteoPedidosPrevio = -1
+
     init { refreshAll() }
 
     fun refreshAll() {
@@ -55,6 +58,14 @@ class AdminViewModel @Inject constructor(
     private fun cargarPedidos() {
         viewModelScope.launch {
             getPedidosUseCase().collect { lista ->
+                // DETECTOR DE NUEVO PEDIDO (Flash + Vibración)
+                if (conteoPedidosPrevio != -1 && lista.size > conteoPedidosPrevio) {
+                    vibrationManager.dispararNotificacionPedidoFlash()
+                }
+
+                // Actualizamos el contador local
+                conteoPedidosPrevio = lista.size
+
                 _uiState.update { it.copy(pedidos = lista) }
             }
         }
@@ -72,7 +83,7 @@ class AdminViewModel @Inject constructor(
                     refreshAll()
                 }
                 onResult(success)
-            } catch (ignore: Exception) {
+            } catch (e: Exception) {
                 onResult(false)
             }
         }
@@ -89,7 +100,7 @@ class AdminViewModel @Inject constructor(
                     refreshAll()
                     onResult(true)
                 } else { onResult(false) }
-            } catch (ignore: Exception) {
+            } catch (e: Exception) {
                 onResult(false)
             }
         }
@@ -105,7 +116,7 @@ class AdminViewModel @Inject constructor(
                     refreshAll()
                     onResult(true)
                 } else { onResult(false) }
-            } catch (ignore: Exception) {
+            } catch (e: Exception) {
                 onResult(false)
             }
         }

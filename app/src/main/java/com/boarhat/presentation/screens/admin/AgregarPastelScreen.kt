@@ -1,5 +1,6 @@
 package com.boarhat.presentation.screens.admin
 
+import android.Manifest
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,19 +44,30 @@ fun AgregarPastelScreen(
     var imagenUri by remember { mutableStateOf<Uri?>(null) }
     var showDialog by remember { mutableStateOf(false) }
 
+    // Launcher para Galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> imagenUri = uri }
 
+    // Launcher para Cámara
     val tempUri = remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
-    ) { success -> if (success) imagenUri = tempUri.value }
+    ) { success ->
+        if (success) imagenUri = tempUri.value
+    }
 
-    fun getTempUri(): Uri {
-        val directory = File(context.cacheDir, "images").apply { mkdirs() }
-        val file = File.createTempFile("pastel_", ".jpg", directory)
-        return FileProvider.getUriForFile(context, "com.boarhat.fileprovider", file)
+    // --- NUEVO: Launcher para Permisos ---
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val uri = getTempUri(context)
+            tempUri.value = uri
+            cameraLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Se requiere permiso de cámara para tomar fotos", Toast.LENGTH_LONG).show()
+        }
     }
 
     Scaffold(
@@ -126,7 +138,7 @@ fun AgregarPastelScreen(
                         viewModel.agregarPastel(nuevo) { success ->
                             if (success) {
                                 Toast.makeText(context, "¡Publicado con éxito!", Toast.LENGTH_SHORT).show()
-                                onPastelGuardado() // Esto dispara el salto a cliente_menu
+                                onPastelGuardado()
                             }
                         }
                     } else {
@@ -149,18 +161,24 @@ fun AgregarPastelScreen(
             text = { Text("¿Desde dónde quieres subir la foto?") },
             confirmButton = {
                 TextButton(onClick = {
-                    val uri = getTempUri()
-                    tempUri.value = uri
-                    cameraLauncher.launch(uri)
                     showDialog = false
+                    // Pedimos permiso antes de intentar abrir cámara
+                    requestPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }) { Text("Cámara") }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    galleryLauncher.launch("image/*")
                     showDialog = false
+                    galleryLauncher.launch("image/*")
                 }) { Text("Galería") }
             }
         )
     }
+}
+
+// Función fuera del Composable para generar la URI
+fun getTempUri(context: android.content.Context): Uri {
+    val directory = File(context.cacheDir, "images").apply { mkdirs() }
+    val file = File.createTempFile("pastel_", ".jpg", directory)
+    return FileProvider.getUriForFile(context, "com.boarhat.fileprovider", file)
 }

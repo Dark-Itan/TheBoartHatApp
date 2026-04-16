@@ -8,12 +8,11 @@ data class Pedido(
     val clienteTelefono: String,
     val items: List<ItemPedido>,
     val total: Double,
-    val fecha: Date,
-    val estado: EstadoPedido,
-    val metodoPago: MetodoPago,
-    val montoRecibido: Double = 0.0,
-    val cambio: Double = 0.0,
-    // AGREGA ESTA LÍNEA PARA SOLUCIONAR EL ERROR:
+    val anticipo50: Double = total / 2,
+    val fecha: Date = Date(),
+    val fechaRecoleccion: String,
+    val estado: EstadoPedido = EstadoPedido.PENDIENTE,
+    val metodoPago: MetodoPago = MetodoPago.TRANSFERENCIA,
     val comprobanteUrl: String? = null
 )
 
@@ -22,19 +21,9 @@ data class ItemPedido(
     val nombre: String,
     val cantidad: Int,
     val precioUnitario: Double,
-    val subtotal: Double
+    val subtotal: Double,
+    val detallesAdicionales: String = ""
 )
 
-enum class EstadoPedido {
-    PENDIENTE,
-    PAGADO,
-    PREPARANDO,
-    ENTREGADO,
-    CANCELADO
-}
-
-enum class MetodoPago {
-    EFECTIVO,
-    TARJETA,
-    TRANSFERENCIA
-}
+enum class EstadoPedido { PENDIENTE, PAGADO, PREPARANDO, ENTREGADO, CANCELADO }
+enum class MetodoPago { EFECTIVO, TARJETA, TRANSFERENCIA }

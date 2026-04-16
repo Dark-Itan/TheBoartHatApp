@@ -4,7 +4,6 @@ import com.boarhat.domain.entities.*
 import java.util.Date
 
 object MockData {
-    // UNICA declaración de listaPasteles
     val listaPasteles = mutableListOf(
         Pastel(
             id = 1,
@@ -36,9 +35,20 @@ object MockData {
                 id = 101,
                 clienteNombre = "Usuario Prueba",
                 clienteTelefono = "123456789",
-                items = emptyList(),
+                items = listOf(
+                    ItemPedido(
+                        pastelId = 1,
+                        nombre = "Pastel de Chocolate",
+                        cantidad = 1,
+                        precioUnitario = 350.0,
+                        subtotal = 350.0,
+                        detallesAdicionales = "Feliz Cumpleaños"
+                    )
+                ),
                 total = 350.0,
+                anticipo50 = 175.0, // Agregado para el cálculo del Perfil
                 fecha = Date(),
+                fechaRecoleccion = "18 de Abril, 5:00 PM", // <-- ESTO ARREGLA EL ERROR
                 estado = EstadoPedido.PENDIENTE,
                 metodoPago = MetodoPago.TRANSFERENCIA,
                 comprobanteUrl = null
