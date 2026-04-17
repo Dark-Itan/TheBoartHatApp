@@ -1,53 +1,65 @@
-package com.boarhat.presentation.viewmodels
+package com.boarhat.presentation.screens.auth
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.boarhat.presentation.viewmodels.AuthViewModel
 
-// Estructura para guardar los datos del usuario
-data class UserData(val nombre: String, val contrasena: String)
+@Composable
+fun LoginScreen(
+    onLoginSuccess: (String) -> Unit,
+    onNavigateToRegistro: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
+    var correo by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
 
-@HiltViewModel
-class AuthViewModel @Inject constructor() : ViewModel() {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Bienvenido a The Boar Hat", style = MaterialTheme.typography.headlineLarge)
 
-    private val _isAuthenticated = MutableStateFlow(false)
-    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+        Spacer(modifier = Modifier.height(32.dp))
 
-    // Base de datos temporal en memoria
-    private val usuariosRegistrados = mutableMapOf<String, UserData>()
+        OutlinedTextField(
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-    fun login(correo: String, password: String): String? {
-        val emailKey = correo.lowercase().trim()
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        return when {
-            // Credenciales de Admin
-            emailKey == "admin" && password == "admin123" -> "admin"
-            // Verificación en usuarios registrados
-            usuariosRegistrados[emailKey]?.contrasena == password -> "cliente"
-            // Usuario cliente por defecto (para pruebas)
-            emailKey == "cliente" && password == "12345" -> "cliente"
-            else -> null
+        errorMsg?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
         }
-    }
 
-    fun registrarUsuario(nombre: String, correo: String, contrasena: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val emailKey = correo.lowercase().trim()
-            if (!usuariosRegistrados.containsKey(emailKey)) {
-                usuariosRegistrados[emailKey] = UserData(nombre, contrasena)
-                onResult(true)
-            } else {
-                onResult(false) // El correo ya existe
-            }
+        Button(
+            onClick = {
+                val rol = viewModel.login(correo, password)
+                if (rol != null) onLoginSuccess(rol) else errorMsg = "Credenciales incorrectas"
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+        ) {
+            Text("Entrar")
         }
-    }
 
-    fun logout() {
-        _isAuthenticated.value = false
+        TextButton(onClick = onNavigateToRegistro) {
+            Text("¿No tienes cuenta? Regístrate")
+        }
     }
 }

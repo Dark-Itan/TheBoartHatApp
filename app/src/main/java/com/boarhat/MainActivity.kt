@@ -19,7 +19,7 @@ class MainActivity : FragmentActivity() {
             TheBoarHatTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                     color = MaterialTheme.colorScheme.background
                 ) {
                     NavGraph()
                 }

@@ -6,7 +6,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.boarhat.presentation.screens.admin.*
 import com.boarhat.presentation.screens.auth.LoginScreen
-import com.boarhat.presentation.screens.auth.RegistroScreen // <--- Importante añadir este
+import com.boarhat.presentation.screens.auth.RegistroScreen
 import com.boarhat.presentation.screens.cliente.*
 
 @Composable
@@ -15,20 +15,19 @@ fun NavGraph() {
 
     NavHost(navController = navController, startDestination = "login") {
 
-        // --- LOGIN ---
+        // --- AUTENTICACIÓN ---
         composable("login") {
             LoginScreen(
-                onLoginSuccess = { rol ->
+                onLoginSuccess = { rol: String -> // Se añade :String para evitar el error de inferencia
                     val destino = if (rol == "admin") "admin_dashboard" else "cliente_menu"
                     navController.navigate(destino)
                 },
                 onNavigateToRegistro = {
-                    navController.navigate("registro") // <--- Esto resuelve el error
+                    navController.navigate("registro")
                 }
             )
         }
 
-        // --- REGISTRO (NUEVA RUTA) ---
         composable("registro") {
             RegistroScreen(
                 onRegistroExitoso = {
