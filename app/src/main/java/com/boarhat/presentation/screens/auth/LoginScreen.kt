@@ -1,13 +1,16 @@
 package com.boarhat.presentation.screens.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.boarhat.R // Asegúrate de que este import esté presente
 import com.boarhat.presentation.viewmodels.AuthViewModel
 
 @Composable
@@ -25,9 +28,18 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // --- AQUÍ ESTÁ TU LOGO ---
+        Image(
+            painter = painterResource(id = R.drawable.logo_boarhat),
+            contentDescription = "Logo de The Boar Hat",
+            modifier = Modifier
+                .size(150.dp) // Tamaño del logo
+                .padding(bottom = 24.dp)
+        )
+
         Text("Bienvenido a The Boar Hat", style = MaterialTheme.typography.headlineLarge)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = correo,
