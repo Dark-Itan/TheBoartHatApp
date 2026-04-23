@@ -1,9 +1,9 @@
 package com.boarhat.core.di
 
 import android.content.Context
-import com.boarhat.data.datasources.local.BoarHatDatabase
-import com.boarhat.data.datasources.local.PastelDao
-import com.boarhat.data.datasources.local.PedidoDao
+import com.boarhat.features.admin.data.local.BoarHatDatabase
+import com.boarhat.features.admin.data.local.PastelDao
+import com.boarhat.features.admin.data.local.PedidoDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
